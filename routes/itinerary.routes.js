@@ -2,12 +2,12 @@ const router = require("express").Router();
 const mongoose = require('mongoose');
 
 const Itinerary = require('../models/Itinerary.model');
-// const Activity = require('../models/Activity.model');
+const Activity = require('../models/Activity.model');
 
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
     Itinerary.find()
-    //   .populate('activities')
+      .populate('activities')
       .then(allItneraries => res.json(allItneraries))
       .catch(err => res.json(err));
 });
@@ -33,7 +33,7 @@ router.get('/itineraries/:itineraryId', (req, res) => {
     // Each Itinerary document has `activities` array holding `_id`s of Activity documents
     // We use .populate() method to get swap the `_id`s for the actual Activity documents
     Itinerary.findById(itineraryId)
-    //   .populate('activities')
+      .populate('activities')
       .then(itinerary => res.status(200).json(itinerary))
       .catch(error => res.json(error));
 });
