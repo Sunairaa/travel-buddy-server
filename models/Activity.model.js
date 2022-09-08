@@ -4,7 +4,7 @@ const activitySchema = new Schema({
     name: {type: String, required: true},
     imageUrl: {type: String},
     date: {type: Date, required: true},
-    time: {type: TimeRanges, required: true}, 
+    time: {type: Number, required: true}, 
     location: {type: String, required: true},
     description: {type: String, required: true},
     itinerary: { type: Schema.Types.ObjectId, ref: 'Itinerary' }, 
