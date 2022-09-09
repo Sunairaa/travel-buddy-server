@@ -31,39 +31,47 @@ router.post('/signup', (req, res) => {
       return;
     }
    
-   
-    // Check the users collection if a user with the same email already exists
-    User.findOne({ email })
+    User.findOne({ name })
       .then((foundUser) => {
-        // If the user with the same email already exists, send an error response
-        if (foundUser) {
-          res.status(400).json({ message: "User already exists." });
+      //Check if user exists
+      if (foundUser) {
+        res.status(400).json({ message: "User already exists." });
           return;
-        }
-   
-        // If email is unique, proceed to hash the password
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hashedPassword = bcrypt.hashSync(password, salt);
-   
-        // Create the new user in the database
-        // We return a pending promise, which allows us to chain another `then` 
-        return User.create({ email, password: hashedPassword, name });
-      })
-      .then((createdUser) => {
-        // Deconstruct the newly created user object to omit the password
-        // We should never expose passwords publicly
-        const { email, name, _id } = createdUser;
+      }
       
-        // Create a new object that doesn't expose the password
-        const user = { email, name, _id };
-   
-        // Send a json response containing the user object
-        res.status(201).json({ user: user });
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({ message: "Internal Server Error" })
-      });
+      // Check the users collection if a user with the same email already exists
+      User.findOne({ email })
+        .then((foundUser) => {
+          // If the user with the same email already exists, send an error response
+          if (foundUser) {
+            res.status(400).json({ message: "Email already exists." });
+            return;
+          }
+    
+          // If email is unique, proceed to hash the password
+          const salt = bcrypt.genSaltSync(saltRounds);
+          const hashedPassword = bcrypt.hashSync(password, salt);
+    
+          // Create the new user in the database
+          // We return a pending promise, which allows us to chain another `then` 
+          return User.create({ email, password: hashedPassword, name })
+            .then((createdUser) => {
+              // Deconstruct the newly created user object to omit the password
+              // We should never expose passwords publicly
+              const { email, name, _id } = createdUser;
+            
+              // Create a new object that doesn't expose the password
+              const user = { email, name, _id };
+        
+              // Send a json response containing the user object
+              res.status(201).json({ user: user });
+            })
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({ message: "Internal Server Error" })
+        });
+    })
   });
 
 
@@ -83,7 +91,7 @@ router.post('/login', (req, res) => {
       
         if (!foundUser) {
           // If the user is not found, send an error response
-          res.status(401).json({ message: "User not found." })
+          res.status(401).json({ message: "Email not found." })
           return;
         }
    
