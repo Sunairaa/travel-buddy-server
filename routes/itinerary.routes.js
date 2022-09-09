@@ -14,9 +14,14 @@ router.get('/itineraries', (req, res) => {
 
 //  POST /api/itineraries -  Creates a new itinerary
 router.post('/itineraries', (req, res) => {
-  const { title, location, imageUrl, flightDeparture, flightReturn, airline, hotelCheckin, hotelCheckout, hotelName, isPublic, activities, user } = req.body;
+  const { title, countries, cities, imageUrl, flightDetails, hotelDetails, isPublic, notes, activities, user } = req.body;
+  
+  flightDetailsObj = JSON.parse(flightDetails)
+  hotelDetailsObj = JSON.parse(hotelDetails)
+  activitiessObj = JSON.parse(activities)
 
-  Itinerary.create({ title, location, imageUrl, flightDeparture, flightReturn, airline, hotelCheckin, hotelCheckout, hotelName, isPublic, activities, user })
+  console.log(flightDetailsObj)
+  Itinerary.create({ title, imageUrl, countries, cities, flightDetails: flightDetailsObj, hotelDetails: hotelDetailsObj, activities: activitiessObj, notes, isPublic, user})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
