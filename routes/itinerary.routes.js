@@ -14,7 +14,7 @@ router.get('/itineraries', (req, res) => {
 
 //  POST /api/itineraries -  Creates a new itinerary
 router.post('/itineraries', (req, res) => {
-  const { title, countries, cities, imageUrl, flightDetails, hotelDetails, isPublic, notes, activities, user } = req.body;
+  const { title, duration, countries, cities, imageUrl, flightDetails, hotelDetails, isPublic, notes, activities, user } = req.body;
   
   flightDetailsObj = JSON.parse(flightDetails)
   hotelDetailsObj = JSON.parse(hotelDetails)
@@ -38,7 +38,7 @@ router.get('/itineraries/:itineraryId', (req, res) => {
     // Each Itinerary document has `activities` array holding `_id`s of Activity documents
     // We use .populate() method to get swap the `_id`s for the actual Activity documents
     Itinerary.findById(itineraryId)
-      .populate('activities')
+      // .populate('activities')
       .then(itinerary => res.status(200).json(itinerary))
       .catch(error => res.json(error));
 });
