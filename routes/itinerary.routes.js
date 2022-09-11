@@ -32,7 +32,7 @@ router.post('/itineraries', isAuthenticated, (req, res) => {
   // hotelDetailsObj = JSON.parse(hotelDetails)
   // activitiessObj = JSON.parse(activities)
 
-  Itinerary.create({ isPublic, title, duration,imageUrl: imageUrl || 'https://images.unsplash.com/photo-1499591934245-40b55745b905?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2372&q=80', countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
+  Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
