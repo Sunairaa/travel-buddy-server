@@ -7,10 +7,17 @@ const jwt = require("jsonwebtoken");
 const { isAuthenticated } = require("./../middleware/jwt.middleware");
 
 
+// GET /api/profile -  Retrieves the user
+router.get('/profile', (req, res) => {
+    User.find()
+      .then(user => res.json(user))
+      .catch(err => res.json(err));
+});
+
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
     Itinerary.find()
-      .populate('activities')
+      .populate(['activities', 'user'])
       .then(allItneraries => res.json(allItneraries))
       .catch(err => res.json(err));
 });
@@ -21,12 +28,11 @@ router.post('/itineraries', isAuthenticated, (req, res) => {
   const { _id } = req.payload; 
   const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
   
-  console.log("userID", _id)
   // flightDetailsObj = JSON.parse(flightDetails)
   // hotelDetailsObj = JSON.parse(hotelDetails)
   // activitiessObj = JSON.parse(activities)
 
-  Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user : _id})
+  Itinerary.create({ isPublic, title, duration,imageUrl: imageUrl || 'https://images.unsplash.com/photo-1499591934245-40b55745b905?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2372&q=80', countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
