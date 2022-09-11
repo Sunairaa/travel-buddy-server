@@ -4,7 +4,7 @@ const Itinerary = require('../models/Itinerary.model');
 const User = require('../models/User.model');
 
 const jwt = require("jsonwebtoken");
-const { isAuthenticated } = require("./../middleware/jwt.middleware");
+const { isAuthenticated, isOwner } = require("./../middleware/jwt.middleware");
 
 
 // GET /api/profile -  Retrieves the user
@@ -49,7 +49,6 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
    
     Itinerary.findById(itineraryId)
       .populate("user")
-      
       .then(itinerary => {
         console.log(itinerary)
         // check if the itinerary and current logged user are same
@@ -72,20 +71,37 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
 // PUT  /api/itineraries/:id -  Updates a specific itinerary by id
 router.put('/itineraries/:id', isAuthenticated, (req, res) => {
     const itineraryId = req.params.id;
-   
+    const  loggedInUserId = req.payload._id;
+    const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
+
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });
       return;
     }
    
-    Itinerary.findByIdAndUpdate(itineraryId, req.body, { new: true })
-      .then((updatedItinerary) => res.json(updatedItinerary))
-      .catch(error => res.json(error));
+    Itinerary.findById(itineraryId)
+      .populate("user")
+      .then((itineraryToUpdate) => {
+        // check if the itinerary and current logged user are same
+        const isOwner = loggedInUserId  === itineraryToUpdate.user._id.toString()
+
+        if(!isOwner) {
+          res.status(403).json({ message: 'Current user is not owner of this itinerary.' })
+          return;
+        }
+
+        Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user}, {new: true})
+        .then((updatedItinerary) => res.json(updatedItinerary))
+        .catch(error => res.json(error));
+      
+      })
+    
+      
 });
 
 
 // DELETE  /api/itineraries/:id  -  Deletes a specific itinerary by id
-router.delete('/itineraries/:id', (req, res) => {
+router.delete('/itineraries/:id', isAuthenticated, isOwner, (req, res) => {
     const itineraryId = req.params.id;
     
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
