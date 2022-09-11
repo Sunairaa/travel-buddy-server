@@ -4,7 +4,7 @@ const Itinerary = require('../models/Itinerary.model');
 const User = require('../models/User.model');
 
 const jwt = require("jsonwebtoken");
-const { isAuthenticated } = require("./../middleware/jwt.middleware");
+const { isAuthenticated, isOwner } = require("./../middleware/jwt.middleware");
 
 
 // GET /api/profile -  Retrieves the user
@@ -101,7 +101,7 @@ router.put('/itineraries/:id', isAuthenticated, (req, res) => {
 
 
 // DELETE  /api/itineraries/:id  -  Deletes a specific itinerary by id
-router.delete('/itineraries/:id', (req, res) => {
+router.delete('/itineraries/:id', isAuthenticated, isOwner, (req, res) => {
     const itineraryId = req.params.id;
     
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {

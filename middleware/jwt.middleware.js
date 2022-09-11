@@ -24,7 +24,15 @@ function getTokenFromHeaders (req) {
 }
 
 
+const isOwner = (req, res, next) => {
+  if(!req.payload._id === req.params.itineraryId){
+   res.redirect('/')
+  }
+  next()
+}
+
 // Export the middleware so that we can use it to create a protected routes
 module.exports = {
-  isAuthenticated
+  isAuthenticated,
+  isOwner
 }
