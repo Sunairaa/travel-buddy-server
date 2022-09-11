@@ -18,7 +18,7 @@ router.get('/profile', (req, res) => {
 router.get('/itineraries', (req, res) => {
 
     Itinerary.find( { isPublic : { $in: [ true ] } })
-    .populate(['activities', 'user'])
+    .populate('user')
       .then(allItneraries => res.json(allItneraries))
       .catch(err => res.json(err));
 });
