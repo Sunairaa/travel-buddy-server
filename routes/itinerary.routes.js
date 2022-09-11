@@ -9,7 +9,7 @@ const { isAuthenticated } = require("./../middleware/jwt.middleware");
 
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
-    Itinerary.find()
+    Itinerary.find( { isPublic : { $in: [ true ] } })
       .populate('activities')
       .then(allItneraries => res.json(allItneraries))
       .catch(err => res.json(err));
@@ -19,38 +19,51 @@ router.get('/itineraries', (req, res) => {
 router.post('/itineraries', isAuthenticated, (req, res) => {
   console.log(req.body)
   const { _id } = req.payload; 
-  const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
+  const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes} = req.body;
   
   console.log("userID", _id)
-  // flightDetailsObj = JSON.parse(flightDetails)
-  // hotelDetailsObj = JSON.parse(hotelDetails)
-  // activitiessObj = JSON.parse(activities)
 
   Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user : _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
 
-//  GET /api/itineraries/:itineraryId -  Retrieves a specific itinerary by id
-router.get('/itineraries/:itineraryId', (req, res) => {
-    const { itineraryId } = req.params;
+//  GET /api/itineraries/:id -  Retrieves a specific itinerary by id
+router.get('/itineraries/:id', isAuthenticated, (req, res) => {
+    const { _id } = req.payload; 
+    const itineraryId = req.params.id;
+    const  loggedInUserId = req.payload._id;
    
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });
       return;
     }
    
-    // Each Itinerary document has `activities` array holding `_id`s of Activity documents
-    // We use .populate() method to get swap the `_id`s for the actual Activity documents
     Itinerary.findById(itineraryId)
-      // .populate('activities')
-      .then(itinerary => res.status(200).json(itinerary))
+      .populate("user")
+      
+      .then(itinerary => {
+        console.log(itinerary)
+        // check if the itinerary and current logged user are same
+        const isOwner = loggedInUserId  === itinerary.user._id.toString()
+        // check if the itinerary and current logged user are not same but user is logged in
+        // const isNotOwner = loggedInUserId  !== itinerary.user._id.toString() && req.payload.hasOwnProperty('name')
+        
+        if(!isOwner && itinerary.isPublic === false) {
+          res.status(403).json({ message: 'Current itinerary is private.' })
+          return;
+        }
+      
+        res.status(200).json({itinerary, isOwner})
+
+        console.log(itinerary)
+      })
       .catch(error => res.json(error));
 });
 
-// PUT  /api/itineraries/:itineraryId  -  Updates a specific itinerary by id
-router.put('/itineraries/:itineraryId', (req, res) => {
-    const { itineraryId } = req.params;
+// PUT  /api/itineraries/:id -  Updates a specific itinerary by id
+router.put('/itineraries/:id', isAuthenticated, (req, res) => {
+    const itineraryId = req.params.id;
    
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });
@@ -63,9 +76,9 @@ router.put('/itineraries/:itineraryId', (req, res) => {
 });
 
 
-// DELETE  /api/itineraries/:itineraryId  -  Deletes a specific itinerary by id
-router.delete('/itineraries/:itineraryId', (req, res) => {
-    const { itineraryId } = req.params;
+// DELETE  /api/itineraries/:id  -  Deletes a specific itinerary by id
+router.delete('/itineraries/:id', (req, res) => {
+    const itineraryId = req.params.id;
     
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });
@@ -73,7 +86,7 @@ router.delete('/itineraries/:itineraryId', (req, res) => {
     }
    
     Itinerary.findByIdAndRemove(itineraryId)
-      .then(() => res.json({ message: `Project with ${itineraryId} is removed successfully.` }))
+      .then(() => res.json({ message: `Itinerary with ${itineraryId} is removed successfully.` }))
       .catch(error => res.json(error));
 });
 
