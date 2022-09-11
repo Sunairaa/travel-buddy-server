@@ -1,8 +1,11 @@
 const router = require("express").Router();
 const mongoose = require('mongoose');
-
 const Itinerary = require('../models/Itinerary.model');
-const Activity = require('../models/Activity.model');
+const User = require('../models/User.model');
+
+const jwt = require("jsonwebtoken");
+const { isAuthenticated } = require("./../middleware/jwt.middleware");
+
 
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
@@ -13,15 +16,17 @@ router.get('/itineraries', (req, res) => {
 });
 
 //  POST /api/itineraries -  Creates a new itinerary
-router.post('/itineraries', (req, res) => {
+router.post('/itineraries', isAuthenticated, (req, res) => {
   console.log(req.body)
+  const { _id } = req.payload; 
   const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
   
+  console.log("userID", _id)
   // flightDetailsObj = JSON.parse(flightDetails)
   // hotelDetailsObj = JSON.parse(hotelDetails)
   // activitiessObj = JSON.parse(activities)
 
-  Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user})
+  Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user : _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
