@@ -118,7 +118,7 @@ router.delete('/itineraries/:id', isAuthenticated, isOwner, (req, res) => {
 
 
 // POST "/api/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
-router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
+router.post("/upload", fileUploader.single("image"), (req, res, next) => {
   // console.log("file is: ", req.file)
  
   if (!req.file) {
@@ -131,4 +131,5 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   
   res.json({ fileUrl: req.file.path });
 });
+
 module.exports = router;
