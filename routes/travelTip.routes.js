@@ -18,9 +18,9 @@ router.get('/traveltips', (req, res) => {
 
 //  POST /api/tips -  Creates a new tip
 router.post('/traveltips', isAuthenticated, (req, res) => {
-    const { title, description } = req.body;
+    const { title, description, category } = req.body;
   
-    TravelTip.create({ title, description, owner: _id})
+    TravelTip.create({ title, description, category, owner: _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
 });
