@@ -27,12 +27,9 @@ router.get('/itineraries', (req, res) => {
 
 //  POST /api/itineraries -  Creates a new itinerary
 router.post('/itineraries', isAuthenticated, (req, res) => {
-  console.log(req.body)
   const { _id } = req.payload; 
   const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes} = req.body;
   
-  console.log("userID", _id)
-
   Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
@@ -52,7 +49,6 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
     Itinerary.findById(itineraryId)
       .populate("user")
       .then(itinerary => {
-        console.log(itinerary)
         // check if the itinerary and current logged user are same
         const isOwner = loggedInUserId  === itinerary.user._id.toString()
         // check if the itinerary and current logged user are not same but user is logged in
@@ -71,11 +67,14 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
 });
 
 // PUT  /api/itineraries/:id -  Updates a specific itinerary by id
-router.put('/itineraries/:id', isAuthenticated, (req, res) => {
+router.put('/itineraries/:id', fileUploader.single("image"), isAuthenticated, (req, res) => {
     const itineraryId = req.params.id;
     const  loggedInUserId = req.payload._id;
-    const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
+    const { isPublic, title, duration, imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
 
+    // check if new image uploaded
+    let newImage = req.file ? req.file.path : imageUrl;
+    
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });
       return;
@@ -92,7 +91,7 @@ router.put('/itineraries/:id', isAuthenticated, (req, res) => {
           return;
         }
 
-        Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user}, {new: true})
+        Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration, imageUrl: newImage, countries, cities, flightDetails, hotelDetails, activities, notes, user}, {new: true})
         .then((updatedItinerary) => res.json(updatedItinerary))
         .catch(error => res.json(error));
       
@@ -119,7 +118,6 @@ router.delete('/itineraries/:id', isAuthenticated, isOwner, (req, res) => {
 
 // POST "/api/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
 router.post("/upload", fileUploader.single("image"), (req, res, next) => {
-  // console.log("file is: ", req.file)
  
   if (!req.file) {
     next(new Error("No file uploaded!"));
