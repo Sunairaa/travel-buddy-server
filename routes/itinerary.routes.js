@@ -49,7 +49,7 @@ router.post('/itineraries', isAuthenticated, (req, res) => {
 router.get('/itineraries/:id', isAuthenticated, (req, res) => {
     const { _id } = req.payload; 
     const itineraryId = req.params.id;
-    const  loggedInUserId = req.payload._id;
+    const loggedInUserId = req.payload._id;
    
     if (!mongoose.Types.ObjectId.isValid(itineraryId)) {
       res.status(400).json({ message: 'Specified id is not valid' });

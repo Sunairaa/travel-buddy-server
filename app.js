@@ -26,6 +26,9 @@ app.use("/auth", authRouter);
 const itineraryRouter = require('./routes/itinerary.routes');
 app.use('/api', itineraryRouter);
 
+const TravelTipRouter = require('./routes/travelTip.routes');
+app.use('/api', TravelTipRouter);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 
