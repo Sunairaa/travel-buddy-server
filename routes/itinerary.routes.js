@@ -10,10 +10,20 @@ const { isAuthenticated, isOwner } = require("./../middleware/jwt.middleware");
 const fileUploader = require("../config/cloudinary.config");
 
 // GET /api/profile -  Retrieves the user
-router.get('/profile', (req, res) => {
-    User.find()
+router.get('/profile', isAuthenticated, (req, res) => {
+    const { _id } = req.payload; 
+    User.findById(_id)
       .then(user => res.json(user))
       .catch(err => res.json(err));
+});
+
+// PUT /api/profile -  Updates the user
+router.put('/profile', isAuthenticated, (req, res) => {
+  const { _id } = req.payload; 
+  const {imageUrl} = req.body
+  User.findByIdAndUpdate(_id, {imageUrl}, {new: true})
+    .then(user => res.json(user))
+    .catch(err => res.json(err));
 });
 
 // GET /api/itineraries -  Retrieves all of the itineraries
