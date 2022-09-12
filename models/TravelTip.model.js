@@ -1,11 +1,11 @@
 const { Schema, model } = require("mongoose");
 
-const tipSchema = new Schema({
+const travelTipSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   owner: { type: Schema.Types.ObjectId, ref: "User" }
 })
 
-const Tip = model("Itinerary", tipSchema);
+const TravelTip = model("TravelTip", travelTipSchema);
 
-module.exports = Tip;
+module.exports = TravelTip;
