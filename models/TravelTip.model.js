@@ -9,7 +9,7 @@ const travelTipSchema = new Schema({
     default: "Travel",
     required: true
    },
-  owner: { type: Schema.Types.ObjectId, ref: "User" }
+  user: { type: Schema.Types.ObjectId, ref: "User" }
 })
 
 const TravelTip = model("TravelTip", travelTipSchema);

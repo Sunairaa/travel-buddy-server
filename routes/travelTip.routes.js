@@ -11,17 +11,21 @@ const { isAuthenticated, isOwner } = require("../middleware/jwt.middleware");
 router.get('/traveltips', (req, res) => {
     console.log(req.payload)
     TravelTip.find()
-    .populate('owner')
+    .populate('user')
       .then(response => res.json(response))
       .catch(err => res.json(err));
 });
 
 //  POST /api/tips -  Creates a new tip
 router.post('/traveltips', isAuthenticated, (req, res) => {
+    const { _id } = req.payload; 
     const { title, description, category } = req.body;
   
-    TravelTip.create({ title, description, category, owner: _id})
-    .then(response => res.json(response))
+    TravelTip.create({ title, description, category, user: _id})
+    .then(response => {
+      console.log(response)
+      res.json(response)
+    })
     .catch(err => res.json(err));
 });
 
