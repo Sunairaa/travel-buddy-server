@@ -26,6 +26,16 @@ router.put('/profile', isAuthenticated, (req, res) => {
     .catch(err => res.json(err));
 });
 
+// GET /api/my-itineraries -  Retrieves all of my itineraries
+router.get('/my-itineraries', isAuthenticated, (req, res) => {
+  const { _id } = req.payload; 
+
+  Itinerary.find( { user: _id })
+  .populate('user')
+    .then(allItneraries => res.json(allItneraries))
+    .catch(err => res.json(err));
+});
+
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
 
