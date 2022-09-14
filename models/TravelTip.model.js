@@ -5,7 +5,7 @@ const travelTipSchema = new Schema({
   description: { type: String, required: true },
   category: { 
     type: String, 
-    enum: ["Travel", "Flight", "Hotel", "Other"],
+    enum: ["Transport", "Flight", "Hotel", "Other"],
     default: "Travel",
     required: true
    },
