@@ -8,6 +8,7 @@ const { isAuthenticated, isOwner } = require("./../middleware/jwt.middleware");
 
 // ********* require fileUploader  *********
 const fileUploader = require("../config/cloudinary.config");
+const { response } = require("express");
 
 // GET /api/profile -  Retrieves the user
 router.get('/profile', isAuthenticated, (req, res) => {
@@ -30,11 +31,22 @@ router.put('/profile', isAuthenticated, (req, res) => {
 router.get('/my-itineraries', isAuthenticated, (req, res) => {
   const { _id } = req.payload; 
 
-  Itinerary.find( { user: _id })
+  Itinerary.find({$or:[{user: _id}, {contributor: _id }]})
   .populate('user')
     .then(allItneraries => res.json(allItneraries))
     .catch(err => res.json(err));
 });
+
+// GET /api/user/:email - Get the user by email
+router.get('/user/:email', (req, res) => {
+  const { email } = req.params;
+
+  User.findOne({ email })
+    .then((response) => {
+      res.json(response)
+    })
+    .catch(err => res.json(err));
+})
 
 // GET /api/itineraries -  Retrieves all of the itineraries
 router.get('/itineraries', (req, res) => {
@@ -48,11 +60,25 @@ router.get('/itineraries', (req, res) => {
 //  POST /api/itineraries -  Creates a new itinerary
 router.post('/itineraries', isAuthenticated, (req, res) => {
   const { _id } = req.payload; 
-  const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes} = req.body;
-  
-  Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
+  const { isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, contributorEmail} = req.body;
+
+  if (contributorEmail === undefined) {
+    Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user: _id})
     .then(response => res.json(response))
     .catch(err => res.json(err));
+  } else {
+    let contributerUserId;
+    User.findOne({ email: contributorEmail })
+    .then((foundUser) => {
+      contributerUserId = foundUser._id;
+    })
+    .then(() => {
+      Itinerary.create({ isPublic, title, duration,imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user: _id, contributor: contributerUserId})
+      .then(response => res.json(response))
+      .catch(err => res.json(err));
+    })
+    .catch(err => res.json(err));
+  }
 });
 
 //  GET /api/itineraries/:id -  Retrieves a specific itinerary by id
@@ -68,20 +94,19 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
    
     Itinerary.findById(itineraryId)
       .populate("user")
+      .populate("contributor")
       .then(itinerary => {
         // check if the itinerary and current logged user are same
         const isOwner = loggedInUserId  === itinerary.user._id.toString()
-        // check if the itinerary and current logged user are not same but user is logged in
-        // const isNotOwner = loggedInUserId  !== itinerary.user._id.toString() && req.payload.hasOwnProperty('name')
-        
-        if(!isOwner && itinerary.isPublic === false) {
+        const isContributor = itinerary.contributor != undefined && loggedInUserId  === itinerary.contributor._id.toString() 
+
+        // check if the itinerary and current logged user are not same but user is logged in        
+        if(!isOwner && !isContributor && itinerary.isPublic === false) {
           res.status(403).json({ message: 'Current itinerary is private.' })
           return;
         }
       
-        res.status(200).json({itinerary, isOwner})
-
-        console.log(itinerary)
+        res.status(200).json({itinerary, isOwner, isContributor})
       })
       .catch(error => res.json(error));
 });
@@ -90,7 +115,7 @@ router.get('/itineraries/:id', isAuthenticated, (req, res) => {
 router.put('/itineraries/:id', fileUploader.single("image"), isAuthenticated, (req, res) => {
     const itineraryId = req.params.id;
     const  loggedInUserId = req.payload._id;
-    const { isPublic, title, duration, imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user} = req.body;
+    const { isPublic, title, duration, imageUrl, countries, cities, flightDetails, hotelDetails, activities, notes, user, contributorEmail} = req.body;
 
     // check if new image uploaded
     let newImage = req.file ? req.file.path : imageUrl;
@@ -99,24 +124,39 @@ router.put('/itineraries/:id', fileUploader.single("image"), isAuthenticated, (r
       res.status(400).json({ message: 'Specified id is not valid' });
       return;
     }
-   
+
     Itinerary.findById(itineraryId)
       .populate("user")
       .then((itineraryToUpdate) => {
         // check if the itinerary and current logged user are same
         const isOwner = loggedInUserId  === itineraryToUpdate.user._id.toString()
+        const isContributor = itineraryToUpdate.contributor != undefined && loggedInUserId  === itineraryToUpdate.contributor._id.toString()
 
-        if(!isOwner) {
-          res.status(403).json({ message: 'Current user is not owner of this itinerary.' })
+        if (!isOwner && !isContributor) {
+          res.status(403).json({ message: 'Current user is not owner or contributor of this itinerary.' })
           return;
         }
 
-        Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration, imageUrl: newImage, countries, cities, flightDetails, hotelDetails, activities, notes, user}, {new: true})
-        .then((updatedItinerary) => res.json(updatedItinerary))
-        .catch(error => res.json(error));
-      
+        if(contributorEmail === undefined) {
+          Itinerary.updateOne({ _id: itineraryId }, { $unset : { "contributor" : 1} })
+            .then(() => {
+              Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration, imageUrl: newImage, countries, cities, flightDetails, hotelDetails, activities, notes, user}, {new: true})
+              .then((updatedItinerary) => res.json(updatedItinerary))
+            })
+            .catch(error => res.json(error));
+        } else {
+          let contributerUserId;
+          User.findOne({ email: contributorEmail })
+            .then((foundUser) => {
+              contributerUserId = foundUser._id;
+            })
+            .then(() => {
+              Itinerary.findByIdAndUpdate(itineraryId, { isPublic, title, duration, imageUrl: newImage, countries, cities, flightDetails, hotelDetails, activities, notes, user, contributor: contributerUserId}, {new: true})
+                .then((updatedItinerary) => res.json(updatedItinerary))
+                .catch(error => res.json(error));
+            })
+        }
       })
-    
       
 });
 
