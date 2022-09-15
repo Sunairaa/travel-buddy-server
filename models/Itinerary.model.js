@@ -11,7 +11,8 @@ const itinerarySchema = new Schema({
   hotelDetails: { type: [Object] },
   activities: { type: [Object], required: true },
   notes: { type: [String] },
-  user: { type: Schema.Types.ObjectId, ref: "User" }
+  user: { type: Schema.Types.ObjectId, ref: "User" },
+  contributor: { type: Schema.Types.ObjectId, ref: "User" }
 })
 
 const Itinerary = model("Itinerary", itinerarySchema);
