@@ -25,16 +25,17 @@ Travel Buddy is an app for managing or exploring travel plans. Users can create 
 | `/signup`                 | Signup                     | anon only  `<IsAnon>`    | Signup form, link to login, navigate to home page after signup |
 | `/login`                  | Login                      | anon only `<IsAnon>`     | Login form, link to signup, navigate to home page after login  |
 | `/logout`                 | n/a                            | user only `<IsPrivate>`  | Navigate to landing page after logout, expire session             |
-| `/api/profile`                 | Profile                            | user only `<IsPrivate>`  | User can update their profile picture.             |
-| `/api/itineraries`                 | Itineraries                           | public `<Route>`  | Public can only see all public visible itineraries             |
-| `/api/itineraries`                 | NewItineraries                            | user only `<IsPrivate>`  | user can create public or private itineraries. itineraries             |
-| `/api/itineraries/:id`                 | ItinerariesEdit                           | user only `<IsPrivate>`  | Only owner / contributor has access to update itinerary.|
-| `/api/itineraries/:id`                 | ItinerariesDetails                          | user only `<IsPrivate>`  | Only registered user can see details.|
-| `/api/itineraries/:id`                 | ItinerariesDetails                          | user only `<IsPrivate>`  | Only owner has access to delete his own itinerary.|
-| `/api/my-itineraries`                 | UserSpecificItineraries                          | user only `<IsPrivate>`  | User can see list of his own itineraries.|
-| `/api/traveltips`                 | TravelTips                          | public `<Route>`  | User can see list of all travel tips and filter own travel tips if logged in.|
-| `/api/traveltips`                 | NewTravelTip                          | user only `<IsPrivate>`  | User can create new travel tip.|
-| `/api/traveltips/:id`                 | TravelTips                          | user only `<IsPrivate>`  | User can delete his own travel tip.|
+| `/profile`                 | Profile                            | user only `<IsPrivate>`  | User can update their profile picture.             |
+| `/home`                 | Home                            | user only `<IsPrivate>`  | Once user is loggedin it will redirect to home page.             |
+| `/itineraries`                 | Itineraries                           | public `<Route>`  | Public can only see all public visible itineraries             |
+| `/itineraries`                 | NewItineraries                            | user only `<IsPrivate>`  | user can create public or private itineraries. itineraries             |
+| `/itineraries/:id`                 | ItinerariesEdit                           | user only `<IsPrivate>`  | Only owner / contributor has access to update itinerary.|
+| `/itineraries/:id`                 | ItinerariesDetails                          | user only `<IsPrivate>`  | Only registered user can see details.|
+| `/itineraries/:id`                 | ItinerariesDetails                          | user only `<IsPrivate>`  | Only owner has access to delete his own itinerary.|
+| `/my-itineraries`                 | UserSpecificItineraries                          | user only `<IsPrivate>`  | User can see list of his own itineraries.|
+| `/traveltips`                 | TravelTips                          | public `<Route>`  | User can see list of all travel tips and filter own travel tips if logged in.|
+| `/traveltips`                 | NewTravelTip                          | user only `<IsPrivate>`  | User can create new travel tip.|
+| `/traveltips/:id`                 | TravelTips                          | user only `<IsPrivate>`  | User can delete his own travel tip.|
 
 <br>
           
